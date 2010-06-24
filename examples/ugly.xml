@@ -1,0 +1,1 @@
+<Configuration><UPnP><UDN><MediaRenderer>6c36e3a3-xxxx=4e1c-ac5f-506e515f0491</MediaRenderer></UDN><MythFronten><DefaultBackend><DBHostName>localhost</DBHostName><DBUserName>mythtv</DBUserName><DBPassword>xxxxxxx</DBPassword><DBName>mythconverg</DBName><DBPort>0</DBPort></DefaultBackend></MythFrontend></UPnP></Configuration>

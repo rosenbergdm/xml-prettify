@@ -35,9 +35,28 @@ data XmlTag = XmlTag
 
 inputToTags :: String -> [XmlTag]
 inputToTags [] = []
+inputToTags "" = []
 inputToTags st = 
-  let (xtag, st') = lexOneTag st
+  let (xtag, st') = lexOne st
   in (concat [[xtag], inputToTags st'])
+
+lexOne :: String -> (XmlTag, String)
+lexOne inp =
+  let nextS   = dropWhile (\z -> z `elem` " \t\r\n") inp
+      nextC   = head $ concat [nextS, " "]
+      result  = case (nextC == '<', nextC == ' ') of
+                      (_, True)  -> (XmlTag "" Standalone, "")
+                      (True, _)  -> lexOneTag inp
+                      (False, _) -> lexNonTagged inp
+  in result
+
+lexNonTagged :: String -> (XmlTag, String)
+lexNonTagged inp = 
+  let inp'       = dropWhile (\z -> z `elem` " \t\r\n") inp
+      (con, rem) = span (\z -> z `notElem` " \n\r<") inp'
+      xtag       = Standalone
+  in (XmlTag con xtag, rem)
+
 
 lexOneTag :: String -> (XmlTag, String)
 lexOneTag inp = 
@@ -68,15 +87,14 @@ printTag ident tag = do
   return ident2
 
 printAllTags :: [XmlTag] -> IO ()
-printAllTags tags = printTags (tags, 0)
+printAllTags tgs = printTags tgs 0
 
-printTags :: ([XmlTag], Int) -> IO ()
-printTags ([], ident) = do
+printTags :: [XmlTag] -> Int -> IO ()
+printTags [] ident = do
   putStrLn ""
   return ()
-printTags ((tag:tags), ident) = do
+printTags (tag:tags) ident = do
   ident' <- printTag ident tag
-  res'   <- printTags (tags, ident')
+  res'   <- printTags tags ident'
   return res'
-
 
