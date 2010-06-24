@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------
--- Module      : XmlPrettify
+-- Module      : Text.XML.Prettify
 -- Copyright   : (c) 2010 David M. Rosenberg
 -- License     : BSD3
 -- 
@@ -12,6 +12,7 @@
 --    DESCRIPTION HERE.
 -----------------------------------------------------------------------------
 
+ 
 module Text.XML.Prettify 
   ( TagType (..)
   , XmlTag (..)
@@ -20,6 +21,8 @@ module Text.XML.Prettify
   , printTag
   , printTags
   , printAllTags
+  , lexOne
+  , lexNonTagged
   ) where
 
 
@@ -73,28 +76,24 @@ lexOneTag inp =
   in (XmlTag contnt xtag, res)
 
 
-printTag :: Int -> XmlTag -> IO Int
-printTag ident tag = do
+printTag :: Int -> XmlTag -> (String, Int)
+printTag ident tag = 
   let ident1    = case (tagtype tag) of
                     Dec    -> ident -1
                     _      -> ident
-  let outstring = (replicate (ident1 * 2) ' ') ++ (content tag)
+      outstring = (replicate (ident1 * 2) ' ') ++ (content tag)
       ident2    = case (tagtype tag) of 
                     Inc    -> ident + 1
                     Dec    -> ident - 1
                     _      -> ident
-  putStrLn outstring
-  return ident2
+  in (outstring, ident2)
 
-printAllTags :: [XmlTag] -> IO ()
+printAllTags :: [XmlTag] -> String
 printAllTags tgs = printTags tgs 0
 
-printTags :: [XmlTag] -> Int -> IO ()
-printTags [] ident = do
-  putStrLn ""
-  return ()
-printTags (tag:tags) ident = do
-  ident' <- printTag ident tag
-  res'   <- printTags tags ident'
-  return res'
+printTags :: [XmlTag] -> Int -> String
+printTags [] ident = []
+printTags (tag:tags) ident = 
+  let (txt, ident')  = printTag ident tag
+  in concat [txt, "\n", printTags tags ident']
 
